@@ -1,0 +1,34 @@
+var dataset = ee.FeatureCollection('WWF/HydroSHEDS/v1/FreeFlowingRivers');
+// Paint 'RIV_ORD' (river order) value to an image for visualization.
+var datasetVis = ee.Image().byte().paint(dataset, 'RIV_ORD', 2);
+var visParams = {
+  min: 1,
+  max: 10,
+  palette: ['08519c', '3182bd', '6baed6', 'bdd7e7', 'eff3ff']
+};
+
+Map.setCenter(-122.348, 45.738, 9);
+Map.addLayer(datasetVis, visParams, 'Free flowing rivers');
+Map.addLayer(dataset, null, 'FeatureCollection', false);
+
+var country = ee.FeatureCollection("FAO/GAUL/2015/level0")
+                .filter(ee.Filter.eq("ADM0_NAME", "Libya"));
+
+Map.centerObject(country, 6);
+
+var wadiDerna = ee.Geometry.Point([22.6307, 32.7667]); 
+Map.centerObject(wadiDerna, 10);
+
+var region = ee.Geometry.Rectangle([20.0, 30.0, 22.0, 32.0])
+
+Export.image.toDrive({
+  image: datasetVis,
+  image: datasetVis.toDouble(),
+  description: 'Wadi_Derna_River',
+  folder: 'GEE_Exports',
+  fileNamePrefix: 'wadi_derna_river',
+  scale: 30,  // Resolution in meters
+  region: region,
+  crs: 'EPSG:4326',  // Set CRS (WGS 84)
+  maxPixels: 1e13
+});

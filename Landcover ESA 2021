@@ -1,0 +1,96 @@
+//1 Define Wadi Derna region using a bounding rectangle
+var wadiDernaExpanded = ee.Geometry.Rectangle([21.555, 32.4035, 23.059, 32.9775]);
+
+//2 Load ESA WorldCover 10m 2021 dataset
+var dataset = ee.ImageCollection('ESA/WorldCover/v200').first();
+var visualization = {
+  bands: ['Map'],
+};
+Map.addLayer(dataset, visualization, 'Landcover');
+
+//3 Clip the dataset to Wadi Derna region
+var wcDerna = dataset.clip(wadiDernaExpanded);
+
+//4 Set visualization parameters (based on ESA color codes)
+var landcoverVis = {
+  min: 10,
+  max: 100,
+  palette: [
+    '006400', // Tree cover (10)
+    'ffbb22', // Shrubland (20)
+    'ffff4c', // Grassland (30)
+    'f096ff', // Cropland (40)
+    'fa0000', // Built-up (50)
+    'b4b4b4', // Bare / sparse vegetation (60)
+    'f0f0f0', // Snow and Ice (70)
+    '0064c8', // Permanent water bodies (80)
+    '0096a0', // Herbaceous wetland (90)
+    '00cf75', // Mangroves (95)
+    'fae6a0'  // Moss and lichen (100)
+  ]
+};
+
+//5 Center the map on Wadi Derna and add the WorldCover layer
+Map.centerObject(wadiDernaExpanded, 10);
+Map.addLayer(wadiDernaExpanded, {color: 'blue'}, 'Expanded Wadi Derna AOI');
+
+//6 Add red outline of the region
+Map.addLayer(wadiDernaExpanded, {color: 'red'}, 'Wadi Derna Area');
+
+//7 Add Legend for ESA WorldCover
+var legend = ui.Panel({
+  style: {
+    position: 'bottom-left',
+    padding: '8px 15px'
+  }
+});
+var legendTitle = ui.Label({
+  value: 'ESA WorldCover 2021 Legend',
+  style: {
+    fontWeight: 'bold',
+    fontSize: '16px',
+    margin: '0 0 6px 0',
+    padding: '0'
+  }
+});
+legend.add(legendTitle);
+
+//8 Define classes and corresponding colors
+var landcoverClasses = [
+  {name: 'Tree cover', color: '006400'},
+  {name: 'Shrubland', color: 'ffbb22'},
+  {name: 'Grassland', color: 'ffff4c'},
+  {name: 'Cropland', color: 'f096ff'},
+  {name: 'Built-up', color: 'fa0000'},
+  {name: 'Bare / sparse vegetation', color: 'b4b4b4'},
+  {name: 'Snow and Ice', color: 'f0f0f0'},
+  {name: 'Water bodies', color: '0064c8'},
+  {name: 'Herbaceous wetland', color: '0096a0'},
+  {name: 'Mangroves', color: '00cf75'},
+  {name: 'Moss and lichen', color: 'fae6a0'}
+];
+
+//9 Function to create legend entries
+landcoverClasses.forEach(function(classItem) {
+  var entry = ui.Panel({
+    layout: ui.Panel.Layout.Flow('horizontal'),
+    style: {margin: '2px 0'}
+  });
+  var colorBox = ui.Label({
+    style: {
+      backgroundColor: '#' + classItem.color,
+      padding: '8px',
+      margin: '0 8px 0 0'
+    }
+  });
+  var description = ui.Label({
+    value: classItem.name,
+    style: {fontSize: '14px'}
+  });
+  entry.add(colorBox);
+  entry.add(description);
+  legend.add(entry);
+});
+
+//10 Add the legend to the map
+Map.add(legend);

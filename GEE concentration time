@@ -1,0 +1,64 @@
+// 1. Load your DEM and watershed
+var dem = ee.Image("projects/ee-eliasgeorgeszgheib/assets/Filled_DEM_Derna"); // Replace with your DEM asset name
+var watershed = ee.FeatureCollection("projects/ee-eliasgeorgeszgheib/assets/wadi_derna"); // Replace with your shapefile
+
+// 2. Optional: visualize
+Map.centerObject(watershed, 11);
+Map.addLayer(dem, {min: 0, max: 1000}, "DEM");
+Map.addLayer(watershed, {}, "Watershed");
+
+// 3. Extract elevation data within the watershed
+var demClipped = dem.clip(watershed);
+
+// 4. Get the maximum elevation point (source)
+var maxElev = demClipped.reduceRegion({
+  reducer: ee.Reducer.max(),
+  geometry: watershed.geometry(),
+  scale: 30,
+  maxPixels: 1e9
+});
+var maxVal = ee.Number(maxElev.get('b1'));
+
+var maxPoint = demClipped.eq(maxVal).selfMask().reduceToVectors({
+  geometry: watershed.geometry(),
+  scale: 30,
+  geometryType: 'centroid',
+  maxPixels: 1e9
+}).geometry();
+
+// 5. Get the minimum elevation point (outlet)
+var minElev = demClipped.reduceRegion({
+  reducer: ee.Reducer.min(),
+  geometry: watershed.geometry(),
+  scale: 30,
+  maxPixels: 1e9
+});
+var minVal = ee.Number(minElev.get('b1'));
+
+var minPoint = demClipped.eq(minVal).selfMask().reduceToVectors({
+  geometry: watershed.geometry(),
+  scale: 30,
+  geometryType: 'centroid',
+  maxPixels: 1e9
+}).geometry();
+
+// 6. Calculate flow path length (straight line for estimation)
+var flowLength = maxPoint.distance(minPoint); // in meters
+print("Flow path length (m):", flowLength);
+
+// 7. Compute slope
+var deltaH = maxVal.subtract(minVal);
+var slope = deltaH.divide(flowLength); // slope = ΔH / L
+print("Elevation drop ΔH (m):", deltaH);
+print("Slope (unitless):", slope);
+
+// 8. Apply Kirpich equation
+// Tc (min) = 0.0195 * L^0.77 * S^-0.385
+var tc = ee.Number(0.0195)
+  .multiply(flowLength.pow(0.77))
+  .multiply(slope.pow(-0.385));
+print("Time of Concentration (Tc) in minutes:", tc);
+
+// 9. Visualize source and outlet points
+Map.addLayer(maxPoint, {color: 'green'}, 'Source (Max Elev)');
+Map.addLayer(minPoint, {color: 'red'}, 'Outlet (Min Elev)');
