@@ -1,15 +1,11 @@
-// ------------------------------------
-// USER INPUTS
-// ------------------------------------
-
-// Load your watershed shapefile from GEE assets
+//to load derna watershed shapefile (from assets)
 var basin = ee.FeatureCollection("projects/ee-eliasgeorgeszgheib/assets/wadi_derna");
 
-// Define time range: 09 Sep 2023 00:00 to 12 Sep 2023 00:00
+//to define time range: 09 Sep 2023 00:00 to 12 Sep 2023 00:00
 var start = ee.Date('2023-09-09T00:00');
 var end = ee.Date('2023-09-12T00:00');
 
-// Load IMERG Final Run Half-Hourly dataset (Version 06)
+//to load IMERG Final Run Half-Hourly dataset (Version 06)
 var imerg = ee.ImageCollection("NASA/GPM_L3/IMERG_V06")
               .filterDate(start, end)
               .filterBounds(basin)
@@ -21,13 +17,12 @@ Map.addLayer(imerg.first(), {min: 0, max: 20, palette: ['white', 'blue', 'purple
 Map.addLayer(basin, {}, 'Wadi Derna');
 
 // ------------------------------------
-// REDUCE TIME SERIES OVER BASIN
-// ------------------------------------
+//to reduce time series over derna basin. 5000 stand for 5k --> 0.1° grid
 var timeSeries = imerg.map(function(image) {
   var mean = image.reduceRegion({
     reducer: ee.Reducer.mean(),
     geometry: basin,
-    scale: 5000, // 5 km matches 0.1° grid
+    scale: 5000,
     maxPixels: 1e13
   });
 
@@ -37,12 +32,9 @@ var timeSeries = imerg.map(function(image) {
   });
 });
 
-// Print time series in the Console
+//to export
 print('IMERG half-hourly precipitation (mm/hr):', timeSeries);
 
-// ------------------------------------
-// EXPORT TO CSV
-// ------------------------------------
 Export.table.toDrive({
   collection: timeSeries,
   description: 'IMERG_HalfHourly_WadiDerna_Sept2023',

@@ -1,29 +1,28 @@
-// Load Wadi Derna basin boundary shapefile from your GEE assets
+//to load Wadi Derna shapefile (from asset)
 var derna = ee.FeatureCollection("projects/ee-eliasgeorgeszgheib/assets/wadi_derna");
 
-// Load soil texture map (select only the texture classification band)
+//to load soil texture map
 var soilTexture = ee.Image("OpenLandMap/SOL/SOL_TEXTURE-CLASS_USDA-TT_M/v02").select("b0");
 
-// Clip soil texture to Wadi Derna
+//to clip soil texture to Wadi Derna
 var clippedSoil = soilTexture.clip(derna);
 
-// Visualization parameters (for map display)
+//to visualization parameters
 var vis = {
   min: 1,
   max: 12,
   palette: ['f7fcf0','e0f3db','ccebc5','a8ddb5','7bccc4','4eb3d3','2b8cbe','08589e'],
 };
 
-// Center and visualize
 Map.centerObject(derna, 10);
 Map.addLayer(clippedSoil, vis, "Soil Texture Class");
 Map.addLayer(derna, {color: 'black'}, "Wadi Derna Boundary");
 
-// Export to Google Drive (optional)
+//to export
 Export.image.toDrive({
   image: clippedSoil,
   description: 'WadiDerna_SoilTexture_HWSD',
-  folder: 'GEE_exports',  // You can change this
+  folder: 'GEE_exports',
   fileNamePrefix: 'WadiDerna_SoilTexture',
   region: derna.geometry(),
   scale: 250,

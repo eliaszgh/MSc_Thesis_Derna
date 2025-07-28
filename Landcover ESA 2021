@@ -1,17 +1,17 @@
-//1 Define Wadi Derna region using a bounding rectangle
+//to define Wadi Derna region using a bounding rectangle
 var wadiDernaExpanded = ee.Geometry.Rectangle([21.555, 32.4035, 23.059, 32.9775]);
 
-//2 Load ESA WorldCover 10m 2021 dataset
+//to load ESA WorldCover 10m 2021 dataset
 var dataset = ee.ImageCollection('ESA/WorldCover/v200').first();
 var visualization = {
   bands: ['Map'],
 };
 Map.addLayer(dataset, visualization, 'Landcover');
 
-//3 Clip the dataset to Wadi Derna region
+//to clip the dataset to Wadi Derna region
 var wcDerna = dataset.clip(wadiDernaExpanded);
 
-//4 Set visualization parameters (based on ESA color codes)
+//to visualize landuses (based on ESA color codes)
 var landcoverVis = {
   min: 10,
   max: 100,
@@ -30,14 +30,12 @@ var landcoverVis = {
   ]
 };
 
-//5 Center the map on Wadi Derna and add the WorldCover layer
+//to center the map on Wadi Derna and add the WorldCover layer
 Map.centerObject(wadiDernaExpanded, 10);
 Map.addLayer(wadiDernaExpanded, {color: 'blue'}, 'Expanded Wadi Derna AOI');
-
-//6 Add red outline of the region
 Map.addLayer(wadiDernaExpanded, {color: 'red'}, 'Wadi Derna Area');
 
-//7 Add Legend for ESA WorldCover
+//to add legend for ESA WorldCover
 var legend = ui.Panel({
   style: {
     position: 'bottom-left',
@@ -55,7 +53,7 @@ var legendTitle = ui.Label({
 });
 legend.add(legendTitle);
 
-//8 Define classes and corresponding colors
+//to define classes with corresponding colors
 var landcoverClasses = [
   {name: 'Tree cover', color: '006400'},
   {name: 'Shrubland', color: 'ffbb22'},
@@ -70,7 +68,6 @@ var landcoverClasses = [
   {name: 'Moss and lichen', color: 'fae6a0'}
 ];
 
-//9 Function to create legend entries
 landcoverClasses.forEach(function(classItem) {
   var entry = ui.Panel({
     layout: ui.Panel.Layout.Flow('horizontal'),

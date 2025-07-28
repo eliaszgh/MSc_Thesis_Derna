@@ -1,5 +1,5 @@
 var dataset = ee.FeatureCollection('WWF/HydroSHEDS/v1/FreeFlowingRivers');
-// Paint 'RIV_ORD' (river order) value to an image for visualization.
+//to load river order value to an image for visualization.
 var datasetVis = ee.Image().byte().paint(dataset, 'RIV_ORD', 2);
 var visParams = {
   min: 1,
@@ -27,8 +27,8 @@ Export.image.toDrive({
   description: 'Wadi_Derna_River',
   folder: 'GEE_Exports',
   fileNamePrefix: 'wadi_derna_river',
-  scale: 30,  // Resolution in meters
+  scale: 30,  //Resolution in meters
   region: region,
-  crs: 'EPSG:4326',  // Set CRS (WGS 84)
+  crs: 'EPSG:4326',
   maxPixels: 1e13
 });

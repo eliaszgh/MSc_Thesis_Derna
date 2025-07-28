@@ -1,23 +1,21 @@
-// 1. Load the DEM (replace with your actual asset ID)
+//to load data (from asset)
 var dem = ee.Image("projects/ee-eliasgeorgeszgheib/assets/Filled_DEM_Derna");
-
-// 2. Load the watershed shapefile
 var basin = ee.FeatureCollection("projects/ee-eliasgeorgeszgheib/assets/wadi_derna");
 
-// 3. Calculate slope in degrees
+//to calculate slope in degrees
 var slope_deg = ee.Terrain.slope(dem);
 
-// 4. Convert slope from degrees to m/m using tangent
+//to convert slope from degrees to m/m using tangent
 var slope_mpm = slope_deg.multiply(Math.PI).divide(180).tan();
 
-// 5. Clip the slope to the watershed
+//to clip the slope to derna watershed
 var slope_mpm_clipped = slope_mpm.clip(basin);
 
-// 6. Display on the map
+//to visualize
 Map.centerObject(basin, 11);
 Map.addLayer(slope_mpm_clipped, {min: 0, max: 1, palette: ['white', 'blue', 'green', 'red']}, 'Slope (m/m)');
 
-// 7. Calculate mean slope (m/m) for the watershed
+//to calculate mean slope (m/m) for the watershed
 var meanSlope_mpm = slope_mpm.reduceRegion({
   reducer: ee.Reducer.mean(),
   geometry: basin.geometry(),
