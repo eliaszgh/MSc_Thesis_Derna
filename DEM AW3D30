@@ -5,15 +5,15 @@ var elevationVis = {
   max: 5000,
   palette: ['0000ff', '00ffff', 'ffff00', 'ff0000', 'ffffff']
 };
-//1 Define adjusted rectangle
+//to define a rectangle
 var adjustedArea = ee.Geometry.Rectangle([21.40, 32.465, 23.18, 32.945]);
 
-//2 Clip and visualize
+//to clip and visualize
 var elevationMosaic = elevation.mosaic().clip(adjustedArea);
 Map.centerObject(adjustedArea, 9);
 Map.addLayer(elevationMosaic, elevationVis, 'Adjusted DEM');
 
-//3 Make the rectangle visible
+//to make the rectangle visible
 var adjustedRectFeature = ee.FeatureCollection([ee.Feature(adjustedArea)]);
 var rectVis = {
   color: 'red',
@@ -22,39 +22,35 @@ var rectVis = {
 };
 Map.addLayer(adjustedRectFeature.style(rectVis), {}, 'Adjusted Rectangle');
 
-// =======================================
-
-// 1. Load ALOS DEM
+//to load ALOS DEM
 var dataset = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2');
 var elevation = dataset.select('DSM');
 
-// 2. Define Wadi Derna bounding box
+//to define Wadi Derna bounding box
 var adjustedArea = ee.Geometry.Rectangle([21.40, 32.465, 23.18, 32.945]);
 
-// 3. Mosaic and clip to area
+//to clip the area
 var elevationMosaic = elevation.mosaic().clip(adjustedArea);
 
-// 4. Visualization settings
+//to visualize
 var elevationVis = {
   min: 0,
   max: 3000,
   palette: ['0000ff', '00ffff', 'ffff00', 'ff0000', 'ffffff']
 };
-
-// 5. Show raw DEM
 Map.centerObject(adjustedArea, 9);
 Map.addLayer(elevationMosaic, elevationVis, 'Raw DEM');
 
-// 6. Fill depressions to create hydrologically conditioned DEM
+//to fill depressions
 var filledDEM = ee.Terrain.fillMinima(elevationMosaic);
 Map.addLayer(filledDEM, elevationVis, 'Depressionless DEM');
 
-// 7. Rectangle overlay
+//to overlay the rectangle
 var rectFeature = ee.FeatureCollection([ee.Feature(adjustedArea)]);
 var rectStyle = {color: 'red', fillColor: '00000000', width: 2};
 Map.addLayer(rectFeature.style(rectStyle), {}, 'Clipping Rectangle');
 
-//8 Export raw dem
+//to export raw dem
 Export.image.toDrive({
   image: elevationMosaic,
   description: 'Raw_DEM_WadiDerna',
