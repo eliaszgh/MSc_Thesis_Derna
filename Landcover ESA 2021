@@ -89,5 +89,6 @@ landcoverClasses.forEach(function(classItem) {
   legend.add(entry);
 });
 
-//10 Add the legend to the map
+//to add the legend to the map
 Map.add(legend);
+
